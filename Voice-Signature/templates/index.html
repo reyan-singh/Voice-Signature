@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio Upload</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<div class="menu">
+    <a href="/">Call Simulator</a>
+    <a href="/upload">Upload Call Sample</a>
+    <a href="/register">Register Call (coming soon)</a>
+</div>
+
+    <h2>Customer call - Simulator</h2>
+    <ul>
+        {% for file in files %}
+        <li><a onclick="manRecognize(this)" href="{{ url_for('static', filename='play/' + file) }}">{{ file }}</a></li>
+        {% endfor %}
+    </ul>
+<ul>
+            <li style="display: inline">
+                <a onclick="manRecord()" >Live Calling</a>
+                <input type="checkbox" onchange="manRecordSelected()" id="chkrecord" name="chkrecord" value="0">
+                <label for="chkrecord"> Record </label>
+                <div id="divuser" name="divuser" style="display: none;" >Enter User Name
+                <input type="text" id="txtUser" name="txtUser" value="TestUser">
+                </div>
+
+
+            </li>
+</ul>
+    <p id="status" class="blinking"></p>
+<script>
+    function waiting()
+    {
+        document.getElementById('status').innerText = 'Analysing ...';
+    }
+
+    function manRecordSelected()
+    {
+          const checkbox = document.getElementById('chkrecord');
+            const isChecked = checkbox.checked;
+            if(isChecked)
+                 document.getElementById('divuser').style['display']='inline';
+            else
+                 document.getElementById('divuser').style['display']='none';
+    }
+
+    function manRecord()
+    {
+        document.getElementById('status').innerText = 'Analysing ...';
+        document.getElementById('status').style['animation']='blinkingText 1.2s infinite;'
+            const checkbox = document.getElementById('chkrecord');
+            const isChecked = checkbox.checked;
+            const txtuserid = document.getElementById('txtUser');
+            const txtuser = txtuserid.value;
+
+            fetch('/record/'+txtuser, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ checked: isChecked })
+            })
+            .then(response => response.json())
+            .then(data =>{
+                val1=data.result;
+                document.getElementById('status').style['animation']='none';
+                document.getElementById('status').style['color']='white';
+                document.getElementById('status').innerText = val1}
+            )
+            .catch(error => console.error('Error:', error));
+    }
+
+     function manRecognize(selflink)
+    {
+        document.getElementById('status').innerText = 'Analysing ...';
+        document.getElementById('status').style['animation']='blinkingText 1.2s infinite;'
+            var lnk=selflink.innerText;
+            const checkbox = document.getElementById('chkrecord');
+            const isChecked = checkbox.checked;
+
+            fetch('/recognize/'+lnk, {
+                method: 'GET',
+                // headers: {'Content-Type': 'application/json'},
+                // body: JSON.stringify({ checked: isChecked })
+            })
+            .then(response => response.json())
+            .then(data =>{
+                val1=data.result;
+                document.getElementById('status').style['animation']='none';
+                document.getElementById('status').style['color']='white';
+                document.getElementById('status').innerText = val1}
+            )
+            .catch(error => console.error('Error:', error));
+    }
+</script>
+</body>
+</html>
